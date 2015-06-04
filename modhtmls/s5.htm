@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+				<html>
+				<head>
+					<title>5</title>
+					<link rel="stylesheet" href="styles.css">
+				</head>
+				<body>
+				<div class="section" id="other-utilities">
+<h2>15.4.5. Other utilities</h2>
+<div class="section" id="sub-commands">
+<h3>15.4.5.1. Sub-commands</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.add_subparsers">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">add_subparsers</tt><big>(</big><span class="optional">[</span><em>title</em><span class="optional">]</span><span class="optional">[</span>, <em>description</em><span class="optional">]</span><span class="optional">[</span>, <em>prog</em><span class="optional">]</span><span class="optional">[</span>, <em>parser_class</em><span class="optional">]</span><span class="optional">[</span>, <em>action</em><span class="optional">]</span><span class="optional">[</span>, <em>option_string</em><span class="optional">]</span><span class="optional">[</span>, <em>dest</em><span class="optional">]</span><span class="optional">[</span>, <em>help</em><span class="optional">]</span><span class="optional">[</span>, <em>metavar</em><span class="optional">]</span><big>)</big></dt>
+<dd><p>Many programs split up their functionality into a number of sub-commands,
+for example, the <tt class="docutils literal"><span class="pre">svn</span></tt> program can invoke sub-commands like <tt class="docutils literal"><span class="pre">svn</span>
+<span class="pre">checkout</span></tt>, <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">update</span></tt>, and <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">commit</span></tt>.  Splitting up functionality
+this way can be a particularly good idea when a program performs several
+different functions which require different kinds of command-line arguments.
+<a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> supports the creation of such sub-commands with the
+<a class="reference internal" href="#argparse.ArgumentParser.add_subparsers" title="argparse.ArgumentParser.add_subparsers"><tt class="xref py py-meth docutils literal"><span class="pre">add_subparsers()</span></tt></a> method.  The <a class="reference internal" href="#argparse.ArgumentParser.add_subparsers" title="argparse.ArgumentParser.add_subparsers"><tt class="xref py py-meth docutils literal"><span class="pre">add_subparsers()</span></tt></a> method is normally
+called with no arguments and returns a special action object.  This object
+has a single method, <tt class="xref py py-meth docutils literal"><span class="pre">add_parser()</span></tt>, which takes a
+command name and any <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> constructor arguments, and
+returns an <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> object that can be modified as usual.</p>
+<p>Description of parameters:</p>
+<ul class="simple">
+<li>title - title for the sub-parser group in help output; by default
+&#8220;subcommands&#8221; if description is provided, otherwise uses title for
+positional arguments</li>
+<li>description - description for the sub-parser group in help output, by
+default None</li>
+<li>prog - usage information that will be displayed with sub-command help,
+by default the name of the program and any positional arguments before the
+subparser argument</li>
+<li>parser_class - class which will be used to create sub-parser instances, by
+default the class of the current parser (e.g. ArgumentParser)</li>
+<li><a class="reference internal" href="#action">action</a> - the basic type of action to be taken when this argument is
+encountered at the command line</li>
+<li><a class="reference internal" href="#dest">dest</a> - name of the attribute under which sub-command name will be
+stored; by default None and no value is stored</li>
+<li><a class="reference internal" href="#help">help</a> - help for sub-parser group in help output, by default None</li>
+<li><a class="reference internal" href="#metavar">metavar</a> - string presenting available sub-commands in help; by default it
+is None and presents sub-commands in form {cmd1, cmd2, ..}</li>
+</ul>
+<p>Some example usage:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># create the top-level parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">'PROG'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'foo help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s">'sub-command help'</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># create the parser for the "a" command</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_a</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'a'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'a help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_a</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'bar'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'bar help'</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># create the parser for the "b" command</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_b</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'b'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'b help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_b</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--baz'</span><span class="p">,</span> <span class="n">choices</span><span class="o">=</span><span class="s">'XYZ'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'baz help'</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># parse some argument lists</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'a'</span><span class="p">,</span> <span class="s">'12'</span><span class="p">])</span>
+<span class="go">Namespace(bar=12, foo=False)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'--foo'</span><span class="p">,</span> <span class="s">'b'</span><span class="p">,</span> <span class="s">'--baz'</span><span class="p">,</span> <span class="s">'Z'</span><span class="p">])</span>
+<span class="go">Namespace(baz='Z', foo=True)</span>
+</pre></div>
+</div>
+<p>Note that the object returned by <a class="reference internal" href="#argparse.ArgumentParser.parse_args" title="argparse.ArgumentParser.parse_args"><tt class="xref py py-meth docutils literal"><span class="pre">parse_args()</span></tt></a> will only contain
+attributes for the main parser and the subparser that was selected by the
+command line (and not any other subparsers).  So in the example above, when
+the <tt class="docutils literal"><span class="pre">a</span></tt> command is specified, only the <tt class="docutils literal"><span class="pre">foo</span></tt> and <tt class="docutils literal"><span class="pre">bar</span></tt> attributes are
+present, and when the <tt class="docutils literal"><span class="pre">b</span></tt> command is specified, only the <tt class="docutils literal"><span class="pre">foo</span></tt> and
+<tt class="docutils literal"><span class="pre">baz</span></tt> attributes are present.</p>
+<p>Similarly, when a help message is requested from a subparser, only the help
+for that particular parser will be printed.  The help message will not
+include parent parser or sibling parser messages.  (A help message for each
+subparser command, however, can be given by supplying the <tt class="docutils literal"><span class="pre">help=</span></tt> argument
+to <tt class="xref py py-meth docutils literal"><span class="pre">add_parser()</span></tt> as above.)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'--help'</span><span class="p">])</span>
+<span class="go">usage: PROG [-h] [--foo] {a,b} ...</span>
+
+<span class="go">positional arguments:</span>
+<span class="go">  {a,b}   sub-command help</span>
+<span class="go">    a     a help</span>
+<span class="go">    b     b help</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">  -h, --help  show this help message and exit</span>
+<span class="go">  --foo   foo help</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'a'</span><span class="p">,</span> <span class="s">'--help'</span><span class="p">])</span>
+<span class="go">usage: PROG a [-h] bar</span>
+
+<span class="go">positional arguments:</span>
+<span class="go">  bar     bar help</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">  -h, --help  show this help message and exit</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'b'</span><span class="p">,</span> <span class="s">'--help'</span><span class="p">])</span>
+<span class="go">usage: PROG b [-h] [--baz {X,Y,Z}]</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">  -h, --help     show this help message and exit</span>
+<span class="go">  --baz {X,Y,Z}  baz help</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#argparse.ArgumentParser.add_subparsers" title="argparse.ArgumentParser.add_subparsers"><tt class="xref py py-meth docutils literal"><span class="pre">add_subparsers()</span></tt></a> method also supports <tt class="docutils literal"><span class="pre">title</span></tt> and <tt class="docutils literal"><span class="pre">description</span></tt>
+keyword arguments.  When either is present, the subparser&#8217;s commands will
+appear in their own group in the help output.  For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s">'subcommands'</span><span class="p">,</span>
+<span class="gp">... </span>                                   <span class="n">description</span><span class="o">=</span><span class="s">'valid subcommands'</span><span class="p">,</span>
+<span class="gp">... </span>                                   <span class="n">help</span><span class="o">=</span><span class="s">'additional help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'foo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'bar'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'-h'</span><span class="p">])</span>
+<span class="go">usage:  [-h] {foo,bar} ...</span>
+
+<span class="go">optional arguments:</span>
+<span class="go">  -h, --help  show this help message and exit</span>
+
+<span class="go">subcommands:</span>
+<span class="go">  valid subcommands</span>
+
+<span class="go">  {foo,bar}   additional help</span>
+</pre></div>
+</div>
+<p>One particularly effective way of handling sub-commands is to combine the use
+of the <a class="reference internal" href="#argparse.ArgumentParser.add_subparsers" title="argparse.ArgumentParser.add_subparsers"><tt class="xref py py-meth docutils literal"><span class="pre">add_subparsers()</span></tt></a> method with calls to <a class="reference internal" href="#argparse.ArgumentParser.set_defaults" title="argparse.ArgumentParser.set_defaults"><tt class="xref py py-meth docutils literal"><span class="pre">set_defaults()</span></tt></a> so
+that each subparser knows which Python function it should execute.  For
+example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="c"># sub-command functions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="n">args</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="n">args</span><span class="o">.</span><span class="n">y</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">'((</span><span class="si">%s</span><span class="s">))'</span> <span class="o">%</span> <span class="n">args</span><span class="o">.</span><span class="n">z</span>
+<span class="gp">...</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># create the top-level parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">()</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># create the parser for the "foo" command</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_foo</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'foo'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_foo</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'-x'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_foo</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'y'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_foo</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">foo</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># create the parser for the "bar" command</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_bar</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'bar'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_bar</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'z'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser_bar</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">bar</span><span class="p">)</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># parse the args and call whatever function was selected</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="s">'foo 1 -x 2'</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="go">2.0</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c"># parse the args and call whatever function was selected</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="s">'bar XYZYX'</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="go">((XYZYX))</span>
+</pre></div>
+</div>
+<p>This way, you can let <a class="reference internal" href="#argparse.ArgumentParser.parse_args" title="argparse.ArgumentParser.parse_args"><tt class="xref py py-meth docutils literal"><span class="pre">parse_args()</span></tt></a> do the job of calling the
+appropriate function after argument parsing is complete.  Associating
+functions with actions like this is typically the easiest way to handle the
+different actions for each of your subparsers.  However, if it is necessary
+to check the name of the subparser that was invoked, the <tt class="docutils literal"><span class="pre">dest</span></tt> keyword
+argument to the <a class="reference internal" href="#argparse.ArgumentParser.add_subparsers" title="argparse.ArgumentParser.add_subparsers"><tt class="xref py py-meth docutils literal"><span class="pre">add_subparsers()</span></tt></a> call will work:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="s">'subparser_name'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparser1</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'1'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparser1</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'-x'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparser2</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s">'2'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">subparser2</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'y'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'2'</span><span class="p">,</span> <span class="s">'frobble'</span><span class="p">])</span>
+<span class="go">Namespace(subparser_name='2', y='frobble')</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="filetype-objects">
+<h3>15.4.5.2. FileType objects</h3>
+<dl class="class">
+<dt id="argparse.FileType">
+<em class="property">class </em><tt class="descclassname">argparse.</tt><tt class="descname">FileType</tt><big>(</big><em>mode='r'</em>, <em>bufsize=None</em><big>)</big></dt>
+<dd><p>The <a class="reference internal" href="#argparse.FileType" title="argparse.FileType"><tt class="xref py py-class docutils literal"><span class="pre">FileType</span></tt></a> factory creates objects that can be passed to the type
+argument of <a class="reference internal" href="#argparse.ArgumentParser.add_argument" title="argparse.ArgumentParser.add_argument"><tt class="xref py py-meth docutils literal"><span class="pre">ArgumentParser.add_argument()</span></tt></a>.  Arguments that have
+<a class="reference internal" href="#argparse.FileType" title="argparse.FileType"><tt class="xref py py-class docutils literal"><span class="pre">FileType</span></tt></a> objects as their type will open command-line arguments as files
+with the requested modes and buffer sizes:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--output'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s">'wb'</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'--output'</span><span class="p">,</span> <span class="s">'out'</span><span class="p">])</span>
+<span class="go">Namespace(output=&lt;open file 'out', mode 'wb' at 0x...&gt;)</span>
+</pre></div>
+</div>
+<p>FileType objects understand the pseudo-argument <tt class="docutils literal"><span class="pre">'-'</span></tt> and automatically
+convert this into <tt class="docutils literal"><span class="pre">sys.stdin</span></tt> for readable <a class="reference internal" href="#argparse.FileType" title="argparse.FileType"><tt class="xref py py-class docutils literal"><span class="pre">FileType</span></tt></a> objects and
+<tt class="docutils literal"><span class="pre">sys.stdout</span></tt> for writable <a class="reference internal" href="#argparse.FileType" title="argparse.FileType"><tt class="xref py py-class docutils literal"><span class="pre">FileType</span></tt></a> objects:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'infile'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s">'r'</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'-'</span><span class="p">])</span>
+<span class="go">Namespace(infile=&lt;open file '&lt;stdin&gt;', mode 'r' at 0x...&gt;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="argument-groups">
+<h3>15.4.5.3. Argument groups</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.add_argument_group">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">add_argument_group</tt><big>(</big><em>title=None</em>, <em>description=None</em><big>)</big></dt>
+<dd><p>By default, <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> groups command-line arguments into
+&#8220;positional arguments&#8221; and &#8220;optional arguments&#8221; when displaying help
+messages. When there is a better conceptual grouping of arguments than this
+default one, appropriate groups can be created using the
+<a class="reference internal" href="#argparse.ArgumentParser.add_argument_group" title="argparse.ArgumentParser.add_argument_group"><tt class="xref py py-meth docutils literal"><span class="pre">add_argument_group()</span></tt></a> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">'PROG'</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">'group'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'foo help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'bar'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'bar help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+<span class="go">usage: PROG [--foo FOO] bar</span>
+
+<span class="go">group:</span>
+<span class="go">  bar    bar help</span>
+<span class="go">  --foo FOO  foo help</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#argparse.ArgumentParser.add_argument_group" title="argparse.ArgumentParser.add_argument_group"><tt class="xref py py-meth docutils literal"><span class="pre">add_argument_group()</span></tt></a> method returns an argument group object which
+has an <a class="reference internal" href="#argparse.ArgumentParser.add_argument" title="argparse.ArgumentParser.add_argument"><tt class="xref py py-meth docutils literal"><span class="pre">add_argument()</span></tt></a> method just like a regular
+<a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a>.  When an argument is added to the group, the parser
+treats it just like a normal argument, but displays the argument in a
+separate group for help messages.  The <a class="reference internal" href="#argparse.ArgumentParser.add_argument_group" title="argparse.ArgumentParser.add_argument_group"><tt class="xref py py-meth docutils literal"><span class="pre">add_argument_group()</span></tt></a> method
+accepts <em>title</em> and <em>description</em> arguments which can be used to
+customize this display:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">'PROG'</span><span class="p">,</span> <span class="n">add_help</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group1</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">'group1'</span><span class="p">,</span> <span class="s">'group1 description'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group1</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'foo'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'foo help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group2</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s">'group2'</span><span class="p">,</span> <span class="s">'group2 description'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group2</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--bar'</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">'bar help'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">print_help</span><span class="p">()</span>
+<span class="go">usage: PROG [--bar BAR] foo</span>
+
+<span class="go">group1:</span>
+<span class="go">  group1 description</span>
+
+<span class="go">  foo    foo help</span>
+
+<span class="go">group2:</span>
+<span class="go">  group2 description</span>
+
+<span class="go">  --bar BAR  bar help</span>
+</pre></div>
+</div>
+<p>Note that any arguments not in your user-defined groups will end up back
+in the usual &#8220;positional arguments&#8221; and &#8220;optional arguments&#8221; sections.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="mutual-exclusion">
+<h3>15.4.5.4. Mutual exclusion</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.add_mutually_exclusive_group">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">add_mutually_exclusive_group</tt><big>(</big><em>required=False</em><big>)</big></dt>
+<dd><p>Create a mutually exclusive group. <a class="reference internal" href="#module-argparse" title="argparse: Command-line option and argument parsing library."><tt class="xref py py-mod docutils literal"><span class="pre">argparse</span></tt></a> will make sure that only
+one of the arguments in the mutually exclusive group was present on the
+command line:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">'PROG'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--bar'</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">'store_false'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'--foo'</span><span class="p">])</span>
+<span class="go">Namespace(bar=True, foo=True)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'--bar'</span><span class="p">])</span>
+<span class="go">Namespace(bar=False, foo=False)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'--foo'</span><span class="p">,</span> <span class="s">'--bar'</span><span class="p">])</span>
+<span class="go">usage: PROG [-h] [--foo | --bar]</span>
+<span class="go">PROG: error: argument --bar: not allowed with argument --foo</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="#argparse.ArgumentParser.add_mutually_exclusive_group" title="argparse.ArgumentParser.add_mutually_exclusive_group"><tt class="xref py py-meth docutils literal"><span class="pre">add_mutually_exclusive_group()</span></tt></a> method also accepts a <em>required</em>
+argument, to indicate that at least one of the mutually exclusive arguments
+is required:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s">'PROG'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">group</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--bar'</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">'store_false'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([])</span>
+<span class="go">usage: PROG [-h] (--foo | --bar)</span>
+<span class="go">PROG: error: one of the arguments --foo --bar is required</span>
+</pre></div>
+</div>
+<p>Note that currently mutually exclusive argument groups do not support the
+<em>title</em> and <em>description</em> arguments of
+<a class="reference internal" href="#argparse.ArgumentParser.add_argument_group" title="argparse.ArgumentParser.add_argument_group"><tt class="xref py py-meth docutils literal"><span class="pre">add_argument_group()</span></tt></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="parser-defaults">
+<h3>15.4.5.5. Parser defaults</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.set_defaults">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">set_defaults</tt><big>(</big><em>**kwargs</em><big>)</big></dt>
+<dd><p>Most of the time, the attributes of the object returned by <a class="reference internal" href="#argparse.ArgumentParser.parse_args" title="argparse.ArgumentParser.parse_args"><tt class="xref py py-meth docutils literal"><span class="pre">parse_args()</span></tt></a>
+will be fully determined by inspecting the command-line arguments and the argument
+actions.  <a class="reference internal" href="#argparse.ArgumentParser.set_defaults" title="argparse.ArgumentParser.set_defaults"><tt class="xref py py-meth docutils literal"><span class="pre">set_defaults()</span></tt></a> allows some additional
+attributes that are determined without any inspection of the command line to
+be added:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'foo'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">bar</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">baz</span><span class="o">=</span><span class="s">'badger'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([</span><span class="s">'736'</span><span class="p">])</span>
+<span class="go">Namespace(bar=42, baz='badger', foo=736)</span>
+</pre></div>
+</div>
+<p>Note that parser-level defaults always override argument-level defaults:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">'bar'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">foo</span><span class="o">=</span><span class="s">'spam'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">([])</span>
+<span class="go">Namespace(foo='spam')</span>
+</pre></div>
+</div>
+<p>Parser-level defaults can be particularly useful when working with multiple
+parsers.  See the <a class="reference internal" href="#argparse.ArgumentParser.add_subparsers" title="argparse.ArgumentParser.add_subparsers"><tt class="xref py py-meth docutils literal"><span class="pre">add_subparsers()</span></tt></a> method for an
+example of this type.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="argparse.ArgumentParser.get_default">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">get_default</tt><big>(</big><em>dest</em><big>)</big></dt>
+<dd><p>Get the default value for a namespace attribute, as set by either
+<a class="reference internal" href="#argparse.ArgumentParser.add_argument" title="argparse.ArgumentParser.add_argument"><tt class="xref py py-meth docutils literal"><span class="pre">add_argument()</span></tt></a> or by
+<a class="reference internal" href="#argparse.ArgumentParser.set_defaults" title="argparse.ArgumentParser.set_defaults"><tt class="xref py py-meth docutils literal"><span class="pre">set_defaults()</span></tt></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s">'badger'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="s">'foo'</span><span class="p">)</span>
+<span class="go">'badger'</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="printing-help">
+<h3>15.4.5.6. Printing help</h3>
+<p>In most typical applications, <a class="reference internal" href="#argparse.ArgumentParser.parse_args" title="argparse.ArgumentParser.parse_args"><tt class="xref py py-meth docutils literal"><span class="pre">parse_args()</span></tt></a> will take
+care of formatting and printing any usage or error messages.  However, several
+formatting methods are available:</p>
+<dl class="method">
+<dt id="argparse.ArgumentParser.print_usage">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">print_usage</tt><big>(</big><em>file=None</em><big>)</big></dt>
+<dd><p>Print a brief description of how the <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> should be
+invoked on the command line.  If <em>file</em> is <tt class="docutils literal"><span class="pre">None</span></tt>, <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><tt class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></tt></a> is
+assumed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="argparse.ArgumentParser.print_help">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">print_help</tt><big>(</big><em>file=None</em><big>)</big></dt>
+<dd><p>Print a help message, including the program usage and information about the
+arguments registered with the <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a>.  If <em>file</em> is
+<tt class="docutils literal"><span class="pre">None</span></tt>, <a class="reference internal" href="sys.html#sys.stdout" title="sys.stdout"><tt class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></tt></a> is assumed.</p>
+</dd></dl>
+
+<p>There are also variants of these methods that simply return a string instead of
+printing it:</p>
+<dl class="method">
+<dt id="argparse.ArgumentParser.format_usage">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">format_usage</tt><big>(</big><big>)</big></dt>
+<dd><p>Return a string containing a brief description of how the
+<a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> should be invoked on the command line.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="argparse.ArgumentParser.format_help">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">format_help</tt><big>(</big><big>)</big></dt>
+<dd><p>Return a string containing a help message, including the program usage and
+information about the arguments registered with the <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="partial-parsing">
+<h3>15.4.5.7. Partial parsing</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.parse_known_args">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">parse_known_args</tt><big>(</big><em>args=None</em>, <em>namespace=None</em><big>)</big></dt>
+<dd></dd></dl>
+
+<p>Sometimes a script may only parse a few of the command-line arguments, passing
+the remaining arguments on to another script or program. In these cases, the
+<a class="reference internal" href="#argparse.ArgumentParser.parse_known_args" title="argparse.ArgumentParser.parse_known_args"><tt class="xref py py-meth docutils literal"><span class="pre">parse_known_args()</span></tt></a> method can be useful.  It works much like
+<a class="reference internal" href="#argparse.ArgumentParser.parse_args" title="argparse.ArgumentParser.parse_args"><tt class="xref py py-meth docutils literal"><span class="pre">parse_args()</span></tt></a> except that it does not produce an error when
+extra arguments are present.  Instead, it returns a two item tuple containing
+the populated namespace and the list of remaining argument strings.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'--foo'</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s">'store_true'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">'bar'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">([</span><span class="s">'--foo'</span><span class="p">,</span> <span class="s">'--badger'</span><span class="p">,</span> <span class="s">'BAR'</span><span class="p">,</span> <span class="s">'spam'</span><span class="p">])</span>
+<span class="go">(Namespace(bar='BAR', foo=True), ['--badger', 'spam'])</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last"><a class="reference internal" href="#prefix-matching"><em>Prefix matching</em></a> rules apply to
+<tt class="xref py py-meth docutils literal"><span class="pre">parse_known_args()</span></tt>. The parser may consume an option even if it&#8217;s just
+a prefix of one of its known options, instead of leaving it in the remaining
+arguments list.</p>
+</div>
+</div>
+<div class="section" id="customizing-file-parsing">
+<h3>15.4.5.8. Customizing file parsing</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.convert_arg_line_to_args">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">convert_arg_line_to_args</tt><big>(</big><em>arg_line</em><big>)</big></dt>
+<dd><p>Arguments that are read from a file (see the <em>fromfile_prefix_chars</em>
+keyword argument to the <a class="reference internal" href="#argparse.ArgumentParser" title="argparse.ArgumentParser"><tt class="xref py py-class docutils literal"><span class="pre">ArgumentParser</span></tt></a> constructor) are read one
+argument per line. <a class="reference internal" href="#argparse.ArgumentParser.convert_arg_line_to_args" title="argparse.ArgumentParser.convert_arg_line_to_args"><tt class="xref py py-meth docutils literal"><span class="pre">convert_arg_line_to_args()</span></tt></a> can be overriden for
+fancier reading.</p>
+<p>This method takes a single argument <em>arg_line</em> which is a string read from
+the argument file.  It returns a list of arguments parsed from this string.
+The method is called once per line read from the argument file, in order.</p>
+<p>A useful override of this method is one that treats each space-separated word
+as an argument:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">def</span> <span class="nf">convert_arg_line_to_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_line</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">arg_line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="exiting-methods">
+<h3>15.4.5.9. Exiting methods</h3>
+<dl class="method">
+<dt id="argparse.ArgumentParser.exit">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">exit</tt><big>(</big><em>status=0</em>, <em>message=None</em><big>)</big></dt>
+<dd><p>This method terminates the program, exiting with the specified <em>status</em>
+and, if given, it prints a <em>message</em> before that.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="argparse.ArgumentParser.error">
+<tt class="descclassname">ArgumentParser.</tt><tt class="descname">error</tt><big>(</big><em>message</em><big>)</big></dt>
+<dd><p>This method prints a usage message including the <em>message</em> to the
+standard error and terminates the program with a status code of 2.</p>
+</dd></dl>
+
+</div>
+</div>
+
+				</body>
+				</html>

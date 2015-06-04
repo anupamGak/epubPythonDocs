@@ -23,10 +23,13 @@ content_opf = """<?xml version='1.0' encoding='utf-8'?>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
     <item id="cover" href="title.html" media-type="application/xhtml+xml"/>
     <item id="content" href="%s.html" media-type="application/xhtml+xml"/>
+    <item id="css" href="styles.css" media-type="text/css"/>
+    %s
   </manifest>
   <spine toc="ncx">
     <itemref idref="cover" />
     <itemref idref="content"/>
+    %s
   </spine>
   <guide>
     <reference href="title.html" type="cover" title="Cover"/>
@@ -55,9 +58,10 @@ toc_ncx = """<?xml version='1.0' encoding='utf-8'?>
     </navPoint>
     <navPoint id="navpoint-2" playOrder="2">
       <navLabel>
-        <text>Content</text>
+        <text>%s</text>
       </navLabel>
       <content src="%s.html"/>
+      %s
     </navPoint>
   </navMap>
 </ncx>"""
@@ -73,11 +77,23 @@ title_html = """<!DOCTYPE html>
 </body>
 </html>"""
 
-def printEpub(htmlcode="", metadata={}):
-	epub = zipfile.ZipFile('epubs/%s.epub' % metadata['modname'], 'w')
+styles_css = """
+pre {
+	background-color : #a4a4a4;
+}
+"""
+
+def printEpub(htmlcode="", modname="", structureData={}, sectionPages=[]):
+	epub = zipfile.ZipFile('epubs/%s.epub' % modname, 'w')
 	epub.writestr("mimetype", "application/epub+zip")
-	epub.writestr("OEBPS/%s.html" % metadata['modname'], htmlcode)
-	epub.writestr("OEBPS/content.opf", content_opf % (metadata['modname'], metadata['modname']))
+	epub.writestr("OEBPS/%s.html" % modname, htmlcode)
+	epub.writestr("OEBPS/content.opf", content_opf % (modname, modname, structureData['manifest'], structureData['spine']))
 	epub.writestr("META-INF/container.xml", container_xml)
-	epub.writestr("OEBPS/toc.ncx", toc_ncx)
-	epub.writestr("OEBPS/title.html", title_html % metadata['modname'])
+	epub.writestr("OEBPS/toc.ncx", toc_ncx % (modname, modname, structureData['toc']))
+	epub.writestr("OEBPS/title.html", title_html % modname)
+	epub.writestr("OEBPS/styles.css", styles_css)
+
+	i = 1
+	for page in sectionPages:
+		epub.writestr("OEBPS/s%s.html" % i, page)
+		i += 1
