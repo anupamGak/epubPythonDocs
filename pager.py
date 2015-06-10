@@ -3,6 +3,7 @@ def pager(soup="", title=""):
 				<html>
 				<head>
 					<title>%s - Documentation</title>
+					<link rel="stylesheet" type="text/css" href="styles.css" />
 				</head>
 				<body>
 				%s

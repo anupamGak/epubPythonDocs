@@ -16,13 +16,33 @@ title[0] = modname
 title = "".join(title)
 
 metadata = {
-	"title" : title,
+	"title" : title.encode('ascii','ignore'),
 	"modname" : modname
 }
-print metadata['title']
+
+sections = modpage.xpath("div/div[@class='section']")
+toc = ""
+for section in sections:
+	sectmeta = {
+		"id" : section.xpath("@id")[0],
+		"title" : section.xpath("h2/text()")[0],
+		"modname" : modname
+	}
+	sectmeta['title'] = " ".join(re.findall("[a-zA-Z]+", sectmeta['title']))
+	toc += """<navPoint>
+	  <navLabel>
+        <text>%(title)s</text>
+      </navLabel>
+      <content src="%(modname)s.html#%(id)s"/>
+    </navPoint>""" % sectmeta
+
+
+
+metadata['toc'] = toc
 
 soup = html.tostring(modpage)
 soup = re.sub(reHeadlink, "", soup)
 
 ePage = pager(soup, modname)
 printEpub(ePage, metadata)
+print "Done!"
