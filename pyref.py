@@ -2,7 +2,7 @@ from lxml import html
 import requests
 import re
 from pager import pager
-from printepub import printEpub
+import printepub
 
 reHeadlink = re.compile('<a class="headerlink".+?<\/a>')
 
@@ -23,18 +23,18 @@ metadata = {
 sections = modpage.xpath("div/div[@class='section']")
 toc = ""
 for section in sections:
-	sectmeta = {
+	sectdata = {
 		"id" : section.xpath("@id")[0],
 		"title" : section.xpath("h2/text()")[0],
 		"modname" : modname
 	}
-	sectmeta['title'] = " ".join(re.findall("[a-zA-Z]+", sectmeta['title']))
+	sectdata['title'] = " ".join(re.findall("[a-zA-Z]+", sectdata['title']))
 	toc += """<navPoint>
 	  <navLabel>
         <text>%(title)s</text>
       </navLabel>
       <content src="%(modname)s.html#%(id)s"/>
-    </navPoint>""" % sectmeta
+    </navPoint>""" % sectdata
 
 
 
@@ -44,5 +44,11 @@ soup = html.tostring(modpage)
 soup = re.sub(reHeadlink, "", soup)
 
 ePage = pager(soup, modname)
-printEpub(ePage, metadata)
+
+choice = raw_input("Do you want to add to an existing epub?[y/n] :")
+if choice == 'y':
+	addtoEpub(epage, metadata)
+else:
+	printEpub(ePage, metadata)
+
 print "Done!"

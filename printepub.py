@@ -77,7 +77,7 @@ title_html = """<!DOCTYPE html>
 
 styles_css = """
 pre {
-	background-color : #4a4a4a;
+	background-color : #a4a4a4;
 }
 
 .descname {
@@ -94,3 +94,7 @@ def printEpub(htmlcode="", metadata={}):
 	epub.writestr("OEBPS/toc.ncx", toc_ncx % metadata)
 	epub.writestr("OEBPS/title.html", title_html % metadata)
 	epub.writestr("OEBPS/styles.css", styles_css)
+
+def addtoEPub(htmlcode="", metadata={}):
+	epub = zipfile.ZipFile('epubs/%s.epub' % metadata['modname'], 'a')
+	epub.writestr("OEBPS/%s.html" % metadata['modname'], htmlcode)
