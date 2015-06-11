@@ -82,7 +82,10 @@ title_html = """<!DOCTYPE html>
 styles_css = """
 pre {
 	font-family : monospace;
-	color : #4a4a4a;
+	border-width : 1px;
+	border-style : solid dashed;
+	border-color : #4a4a4a;
+	padding : 3px;
 }
 h1 {
 	font-size : 2.5em;

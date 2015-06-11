@@ -29,7 +29,7 @@ for section in sections:
 
 	sectdict = {
 		"modname" : modname,
-		"title" : re.findall("(?<= )[A-Za-z ]+", section.xpath("h2/text()")[0])[0],
+		"title" : re.findall("(?<=\d. ).+", section.xpath("h2/text()")[0])[0],
 		"no" : i,
 		"page" : pager(soup, i)
 	}
