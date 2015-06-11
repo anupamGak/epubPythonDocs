@@ -1,7 +1,6 @@
 import zipfile
+from lxml import etree
 import re
-
-reAbbr = re.compile("(?<= )[A-Z]")
 
 container_xml = """<?xml version="1.0"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
@@ -135,6 +134,8 @@ def printEpub(htmlcode="", metadata={}, sectdata=[]):
 	for data in sectdata:
 		epub.writestr("OEBPS/%s%d.html" % (metadata['modname'], data['no']), data['page'])
 
-def addtoEPub(htmlcode="", metadata={}):
+def addtoEpub(htmlcode="", metadata={}):
 	epub = zipfile.ZipFile('epubs/%s.epub' % metadata['modname'], 'a')
-	epub.writestr("OEBPS/%s.html" % metadata['modname'], htmlcode)
+	nons = re.sub('xmlns=".+?"', "", epub.read("OEBPS/toc.ncx"))
+	toc = etree.fromstring(nons)
+	print len(toc.xpath("//navPoint"))

@@ -2,7 +2,7 @@ from lxml import html
 import requests
 import re
 from pager import pager
-from printepub import printEpub
+import printepub
 
 reHeadlink = re.compile('<a class="headerlink".+?<\/a>')
 
@@ -51,5 +51,10 @@ for node in intronodes:
 
 soup = re.sub(reHeadlink, "", soup)
 ePage = pager(soup, modname)
-printEpub(ePage, metadata, sectdata)
+
+choice = raw_input("Create a new epub?[y/n]('n' under construction) :")
+if choice == "y":
+	printepub.printEpub(ePage, metadata, sectdata)
+else:
+	printepub.addtoEpub(ePage, metadata)
 print "Done!"
