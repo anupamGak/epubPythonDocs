@@ -21,34 +21,35 @@ spine = ""
 toc = ""
 i = 1
 sections = modpage.xpath("div/div[@class='section']")
+
+sectdata = []
 for section in sections:
 	soup = html.tostring(section)
 	soup = re.sub(reHeadlink, "", soup)
-	sectionTitle = re.findall("(?<= )[A-Za-z ]+", section.xpath("h2/text()")[0])[0]
-	sectionPages.append(pager(soup, i))
-	manifest += '<item id="html-%s" href="s%s.html" media-type="application/xhtml+xml"/>' % (i, i)
-	spine += '<itemref idref="html-%s"/>' % i
-	toc += """<navPoint id="navpoint-%s" playOrder="%s">
-      <navLabel>
-        <text>%s</text>
-      </navLabel>
-      <content src="s%s.html"/>
-    </navPoint>""" % (i+2, i+2, sectionTitle, i)
-	i += 1
 
-structureData = {
-	"manifest" : manifest,
-	"spine" : spine,
-	"toc" : toc
-}
+	sectdict = {
+		"modname" : modname,
+		"title" : re.findall("(?<= )[A-Za-z ]+", section.xpath("h2/text()")[0])[0],
+		"no" : i,
+		"page" : pager(soup, i)
+	}
+	sectdata.append(sectdict)
+	i += 1
 
 metadata = {
 	"title" : title,
 	"modname" : modname
 }
 
-soup = html.tostring(modpage)
-soup = re.sub(reHeadlink, "", soup)
+intronodes = modpage.xpath("//h1/following-sibling::*")
+soup = html.tostring(modpage.xpath("//h1")[0])
+for node in intronodes:
+	if not node.get('class') == "section":
+		soup += html.tostring(node)
+	else:
+		break
 
+soup = re.sub(reHeadlink, "", soup)
 ePage = pager(soup, modname)
-printEpub(ePage, modname, structureData, sectionPages)
+printEpub(ePage, metadata, sectdata)
+print "Done!"
