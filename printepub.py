@@ -24,6 +24,7 @@ content_opf = """<?xml version='1.0' encoding='utf-8'?>
 	<item id="cover" href="title.html" media-type="application/xhtml+xml"/>
 	<item id="content" href="%(modname)s.html" media-type="application/xhtml+xml"/>
 	%(manifest)s
+	<!--manifest-->
 	<item id="cover-image" href="images/cover.png" media-type="image/png"/>
 	<item id="css" href="styles.css" media-type="text/css"
   </manifest>
@@ -31,6 +32,7 @@ content_opf = """<?xml version='1.0' encoding='utf-8'?>
 	<itemref idref="cover" />
 	<itemref idref="content"/>
 	%(spine)s
+	<!--spine-->
   </spine>
   <guide>
 	<reference href="title.html" type="title-page" title="Title"/>
@@ -63,6 +65,7 @@ toc_ncx = """<?xml version='1.0' encoding='utf-8'?>
 	  </navLabel>
 	  <content src="%(modname)s.html"/>
 		%(toc)s
+		<!--toc-->
 	</navPoint>
   </navMap>
 </ncx>"""
@@ -95,14 +98,14 @@ h1 {
 }"""
 
 
-def filler(sectdata=[]):
+def filler(sectdata=[], navpoint=0):
 	manifest = ""
 	spine = ""
 	toc = ""
 	for data in sectdata:
-		data['navpoint'] = data['no'] + 2
-		manifest += '<item id="html-%(no)s" href="%(modname)s%(no)s.html" media-type="application/xhtml+xml"/>' % data
-		spine += '<itemref idref="html-%(no)s"/>' % data
+		data['navpoint'] = data['no'] + 2 + navpoint
+		manifest += '<item id="html-%(modname)s%(no)s" href="%(modname)s%(no)s.html" media-type="application/xhtml+xml"/>' % data
+		spine += '<itemref idref="html-%(modname)s%(no)s"/>' % data
 		toc += """<navPoint id="navpoint-%(navpoint)s" playOrder="%(navpoint)s">
 					<navLabel>
 						<text>%(title)s</text>
@@ -134,8 +137,13 @@ def printEpub(htmlcode="", metadata={}, sectdata=[]):
 	for data in sectdata:
 		epub.writestr("OEBPS/%s%d.html" % (metadata['modname'], data['no']), data['page'])
 
-def addtoEpub(htmlcode="", metadata={}):
+def addtoEpub(htmlcode="", metadata={}, sectdata=[]):
 	epub = zipfile.ZipFile('epubs/%s.epub' % metadata['modname'], 'a')
 	nons = re.sub('xmlns=".+?"', "", epub.read("OEBPS/toc.ncx"))
 	toc = etree.fromstring(nons)
-	print len(toc.xpath("//navPoint"))
+	navpoints = len(toc.xpath("//navPoint"))
+
+	toc_file = epub.read('OEBPS/toc.ncx')
+	toc_file = toc_file.replace("<!--toc-->", "%(toc)s")
+
+	metadata.update(filler(sectdata))
