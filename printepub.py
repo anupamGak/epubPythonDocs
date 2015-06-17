@@ -77,12 +77,16 @@ title_html = """<!DOCTYPE html>
 
 styles_css = """
 pre {
-	background-color : #4a4a4a;
+	background-color : #a4a4a4;
+	overflow: auto;
 }
 
 .descname {
 	font-weight : bold;
 	font-size : 1.4em;
+}
+.section {
+	page-break-before: always;
 }"""
 
 def printEpub(htmlcode="", metadata={}):
