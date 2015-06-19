@@ -127,9 +127,9 @@ def filler(metadata={}):
 		"toc" : toc
 	}
 
-def printEpub(htmlcode="", metadata={}, append="y"):
+def printEpub(htmlcode="", metadata={}, append=True):
 	global content_opf, toc_ncx
-	if append == "y":
+	if append:
 		epubin = zipfile.ZipFile('epubs/PyReference.epub', 'r')
 
 		content_opf = epubin.read("OEBPS/content.opf")

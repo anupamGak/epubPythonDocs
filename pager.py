@@ -9,7 +9,4 @@ def pager(soup="", title=""):
 				%s
 				</body>
 				</html>""" % (title, soup)
-
-	with open('modhtmls/%s.htm' % title, 'w') as f:
-		f.write(code)
 	return code
