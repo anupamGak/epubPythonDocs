@@ -1,9 +1,10 @@
 import zipfile
 import re
+import os
 
 reAbbr = re.compile("(?<= )[A-Z]")
 reFlag = re.compile(r"<!--([a-z]+)-->")
-reCountflag = re.compie(r"<!--(\d{1,2})-->")
+reCountflag = re.compile(r"<!--(\d{1,2})-->")
 
 container_xml = """<?xml version="1.0"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
@@ -26,10 +27,10 @@ content_opf = """<?xml version='1.0' encoding='utf-8'?>
 	<item id="cover" href="title.html" media-type="application/xhtml+xml"/>
 	<item id="css" href="styles.css" media-type="text/css" />
 	<!--manifest-->
+	<!--00-->
   </manifest>
   <spine toc="ncx">
-	<itemref idref="cover" linear="no"/>
-	<itemref idref="content"/>
+	<itemref idref="cover"/>
 	<!--spine-->
   </spine>
   <guide>
@@ -57,23 +58,18 @@ toc_ncx = """<?xml version='1.0' encoding='utf-8'?>
 	  </navLabel>
 	  <content src="title.html"/>
 	</navPoint>
-	<navPoint id="navpoint-2" playOrder="2">
-	  <navLabel>
-		<text>%(modname)s</text>
-	  </navLabel>
-	  <content src="%(modname)s.html"/>
-	</navPoint>
 	<!--toc-->
+	<!--1-->
   </navMap>
 </ncx>"""
 
 title_html = """<!DOCTYPE html>
 <html>
 <head>
-	<title>Title</title>
+	<title>Python Reference</title>
 </head>
 <body style = "text-align: center;">
-	<h1>%(modname)s</h1>
+	<h1>Python Reference</h1>
 	<p>Python Documentation</p>
 </body>
 </html>"""
@@ -97,19 +93,33 @@ pre {
 """
 
 def filler(metadata={}):
-	manifest = """<item id="module-%(count)s" href="%(modname)s.html" media-type="application/xhtml+xml"/>
-	<!--manifest-->""" % metadata
+	manifest = """<item id="module-%(count)s" href="module-%(count)s.html" media-type="application/xhtml+xml"/>
+	<!--manifest-->
+	<!--%(count)s-->""" % metadata
 
 	spine = """<itemref idref="module-%(count)s"/>
 	<!--spine-->""" % metadata
 
-	toc = """<navPoint id="navpoint-%(navpoint)s" playOrder="%(navpoint)s">
-	  <navLabel>
-		<text>%(modname)s</text>
-	  </navLabel>
-	  <content src="%(modname)s.html"/>
-	</navPoint>
-	<!--toc-->""" % metadata
+	toc = """<navPoint id="navpoint-%(navcount)s" playOrder="%(navcount)s">
+		  <navLabel>
+			<text>%(modname)s</text>
+		  </navLabel>
+		  <content src="module-%(count)s.html#"/>
+		  	""" % metadata
+	for i in range(len(metadata['sectIDs'])):
+		metadata['navcount'] += 1
+		metadata['sectID'] = metadata['sectIDs'][i]
+		metadata['ttl'] = re.findall(r"\d\.\s(.+)", metadata['sectTtl'][i])[0]
+		toc += """<navPoint id="navpoint-%(navcount)s" playOrder="%(navcount)s">
+		  <navLabel>
+			<text>%(ttl)s</text>
+		  </navLabel>
+		  <content src="module-%(count)s.html#%(sectID)s"/>
+		</navPoint>""" % metadata
+
+	toc += """</navpoint>
+	<!--toc-->
+	<!--%(navcount)s-->""" % metadata
 
 	return {
 		"manifest" : manifest,
@@ -117,18 +127,22 @@ def filler(metadata={}):
 		"toc" : toc
 	}
 
-def printEpub(htmlcode="", metadata={}, choice="y"):
-	metadata.update(filler(metadata))
-	if choice == "y":
+def printEpub(htmlcode="", metadata={}, append="y"):
+	global content_opf, toc_ncx
+	if append == "y":
 		epubin = zipfile.ZipFile('epubs/PyReference.epub', 'r')
 
 		content_opf = epubin.read("OEBPS/content.opf")
-		metadata['count'] = re.findall(reCountflag, content_opf)[0]
-		metadata['navpoint'] = int(metadata['count']) + 1
-		content_opf = re.sub(reCountflag, "", content_opf)
-		content_opf = re.sub(reFlag, r"%(\1)s", content_opf)
-
 		toc_ncx = epubin.read("OEBPS/toc.ncx")
+
+		metadata['count'] = str(int(re.findall(reCountflag, content_opf)[0]) + 1).zfill(2)
+		metadata['navcount'] = int(re.findall(reCountflag, toc_ncx)[0]) + 1
+		metadata.update(filler(metadata))
+
+		content_opf = re.sub(reCountflag, "", content_opf)
+		toc_ncx = re.sub(reCountflag, "", toc_ncx)
+
+		content_opf = re.sub(reFlag, r"%(\1)s", content_opf)
 		toc_ncx = re.sub(reFlag, r"%(\1)s", toc_ncx)
 
 		content_opf = content_opf % metadata
@@ -136,22 +150,38 @@ def printEpub(htmlcode="", metadata={}, choice="y"):
 
 
 		epubout = zipfile.ZipFile('epubs/newfile.epub', 'w')
+		epubout.writestr("OEBPS/content.opf", content_opf)
+		epubout.writestr("OEBPS/toc.ncx", toc_ncx)
+		epubout.writestr("mimetype", "application/epub+zip")
+		epubout.writestr("META-INF/container.xml", container_xml)
+		epubout.writestr("OEBPS/styles.css", styles_css)
+		epubout.writestr("OEBPS/module-%(count)s.html" % metadata, htmlcode)
 
+		filenames = [i for i in epubin.namelist() if ".html" in i]
+		for filename in filenames:
+			epubout.writestr(filename, epubin.read(filename))
 
+		epubin.close()
+		epubout.close()
 
+		os.rename("epubs/newfile.epub", "epubs/PyReference.epub")
 
+	else:
+		metadata['count'] = str(int(re.findall(reCountflag, content_opf)[0]) + 1).zfill(2)
+		metadata['navcount'] = int(re.findall(reCountflag, toc_ncx)[0]) + 1
+		metadata.update(filler(metadata))
 
+		content_opf = re.sub(reCountflag, "", content_opf)
+		toc_ncx = re.sub(reCountflag, "", toc_ncx)
 
+		content_opf = re.sub(reFlag, r"%(\1)s", content_opf)
+		toc_ncx = re.sub(reFlag, r"%(\1)s", toc_ncx)
 
-
-
-
-
-	epub = zipfile.ZipFile('epubs/%s.epub' % metadata['modname'], 'w')
-	epub.writestr("mimetype", "application/epub+zip")
-	epub.writestr("OEBPS/%s.html" % metadata['modname'], htmlcode)
-	epub.writestr("OEBPS/content.opf", content_opf % metadata)
-	epub.writestr("META-INF/container.xml", container_xml)
-	epub.writestr("OEBPS/toc.ncx", toc_ncx % metadata)
-	epub.writestr("OEBPS/title.html", title_html % metadata)
-	epub.writestr("OEBPS/styles.css", styles_css)
+		epub = zipfile.ZipFile('epubs/PyReference.epub', 'w')
+		epub.writestr("mimetype", "application/epub+zip")
+		epub.writestr("OEBPS/module-01.html", htmlcode)
+		epub.writestr("OEBPS/content.opf", content_opf % metadata)
+		epub.writestr("META-INF/container.xml", container_xml)
+		epub.writestr("OEBPS/toc.ncx", toc_ncx % metadata)
+		epub.writestr("OEBPS/title.html", title_html % metadata)
+		epub.writestr("OEBPS/styles.css", styles_css)
