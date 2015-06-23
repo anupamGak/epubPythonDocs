@@ -18,26 +18,33 @@ class toEpub:
 	pagehtml = ""
 
 	def __init__(self):
+		self.get_args()
+		if self.new_epub:
+			with open('resources/content.opf', 'r') as f:
+				self.content_opf = f.read()
+			with open('resources/toc.ncx', 'r') as f:
+				self.toc_ncx = f.read()
+		else:
+			with zipfile.ZipFile('epubs/PyReference.epub', 'r') as epubin:
+				self.content_opf = epubin.read("OEBPS/content.opf")
+				self.toc_ncx = epubin.read("OEBPS/toc.ncx")
+
 		with open('resources/container.xml', 'r') as f:
-			self.container_xml = f.read()
-		with open('resources/content.opf', 'r') as f:
-			self.content_opf = f.read()
-		with open('resources/toc.ncx', 'r') as f:
-			self.toc_ncx = f.read()
+				self.container_xml = f.read()
 		with open('resources/title.html', 'r') as f:
-			self.title_html = f.read()
+				self.title_html = f.read()
 		with open('resources/styles.css', 'r') as f:
-			self.styles_css = f.read()
+				self.styles_css = f.read()
 		with open('resources/pagehead.html', 'r') as f:
-			self.pagehead = f.read()
-		new_epub = True
+				self.pagehead = f.read()
 
 	def get_args(self):
 		parser = argparse.ArgumentParser(
 			description="Stores the Python Documentation of the module in an epub file")
-
-		parser.add_argument("module", type=str)
-		parser.add_argument("-a", "--app", action="store_true", help="Append to an existing epub file")
+		parser.add_argument("module", type=str,
+			help="Module whose doucmentation is to be extracted")
+		parser.add_argument("-a", "--app", action="store_true",
+			help="Append to an existing epub file")
 		args = parser.parse_args()
 
 		self.metadata['name'] = args.module
@@ -115,26 +122,22 @@ class toEpub:
 		self.toc_ncx = self.toc_ncx % struct
 
 	def writeEpub(self):
-		epub = zipfile.ZipFile('epubs/newmeta.epub', 'w')
-		epub.writestr("mimetype", "application/epub+zip")
-		epub.writestr("OEBPS/module-01.html", self.pagehtml)
-		epub.writestr("OEBPS/content.opf", self.content_opf)
-		epub.writestr("META-INF/container.xml", self.container_xml)
-		epub.writestr("OEBPS/toc.ncx", self.toc_ncx)
-		epub.writestr("OEBPS/title.html", self.title_html)
-		epub.writestr("OEBPS/styles.css", self.styles_css)
+		epubout = zipfile.ZipFile('epubs/newfile.epub', 'w')
+		epubout.writestr("mimetype", "application/epub+zip")
+		epubout.writestr("OEBPS/content.opf", self.content_opf)
+		epubout.writestr("META-INF/container.xml", self.container_xml)
+		epubout.writestr("OEBPS/toc.ncx", self.toc_ncx)
+		epubout.writestr("OEBPS/styles.css", self.styles_css)
 
-	def printer(self):
-		with open('con.opf', 'w') as f:
-			f.write(self.content_opf)
-		with open('toctoc.ncx', 'w') as f:
-			f.write(self.toc_ncx)
-
-book = toEpub()
-
-book.metadata['name'] = "os"
-
-book.get_html()
-book.get_metadata()
-book.generate_struct()
-book.writeEpub()
+		if self.new_epub:
+			epubout.writestr("OEBPS/module-01.html", self.pagehtml)
+			epubout.writestr("OEBPS/title.html", self.title_html)
+		else:
+			epubout.writestr("OEBPS/module-%(count)s.html" % self.metadata, self.pagehtml)
+			epubin = zipfile.ZipFile('epubs/PyReference.epub', 'r')
+			filenames = [i for i in epubin.namelist() if ".html" in i]
+			for filename in filenames:
+				epubout.writestr(filename, epubin.read(filename))
+			epubin.close()
+		epubout.close()
+		os.rename("epubs/newfile.epub", "epubs/PyReference.epub")
