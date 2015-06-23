@@ -1,0 +1,15 @@
+pre {
+	background-color: #a4a4a4;
+	font-family: monospace;
+	overflow: auto;
+	font-size: 0.85em;
+}
+
+.descname {
+	font-weight: bold;
+	font-size: 1.4em;
+}
+
+.section {
+	page-break-before: always;
+}
